@@ -1,5 +1,5 @@
-github.com/MatthiasKunnen/go-wayland/wayland v0.0.0-20250110181340-e0d3f1e54513 h1:iphAMNo2f5qDE7xiXxFMYylcerOPSXznTqdXA2/Wx58=
-github.com/MatthiasKunnen/go-wayland/wayland v0.0.0-20250110181340-e0d3f1e54513/go.mod h1:3yGoEytH/pY4fbl5ZlW/oBGUJ/JL7B3tMvwPvpJKYmY=
+github.com/MatthiasKunnen/go-wayland/wayland v0.1.0 h1:2FlpsgyOyLeNtxY3uXQtnBN0T2/JTWHMxMDsO1efXU0=
+github.com/MatthiasKunnen/go-wayland/wayland v0.1.0/go.mod h1:3yGoEytH/pY4fbl5ZlW/oBGUJ/JL7B3tMvwPvpJKYmY=
 github.com/godbus/dbus/v5 v5.1.0 h1:4KLkAxT3aOY8Li4FRJe/KvhoNFFxo0m6fNuFUO8QJUk=
 github.com/godbus/dbus/v5 v5.1.0/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
 golang.org/x/sys v0.29.0 h1:TPYlXGxvx1MGTn2GiZDhnjPA9wZzZeGKHHmKhHYvgaU=
