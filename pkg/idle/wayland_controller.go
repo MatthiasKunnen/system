@@ -60,7 +60,7 @@ func NewWaylandIdleController() (Controller, <-chan func() error, error) {
 		switch e.Interface {
 		case idleNotify.IdleNotifierInterfaceName:
 			m.notifier = idleNotify.NewIdleNotifier(m.context())
-			err := m.registry.Bind(e.Name, idleNotify.IdleNotifierInterfaceName+"bork", e.Version, m.notifier)
+			err := m.registry.Bind(e.Name, idleNotify.IdleNotifierInterfaceName, e.Version, m.notifier)
 			if err != nil {
 				globalHandlerError = errors.Join(
 					globalHandlerError,
