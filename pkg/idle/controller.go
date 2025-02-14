@@ -13,7 +13,7 @@ type Controller interface {
 
 type Notification interface {
 	// Close destroys this notification.
-	// Safe to be called multiple times if the closing was successful.
+	// Safe to be called from another goroutine.
 	Close() error
 }
 

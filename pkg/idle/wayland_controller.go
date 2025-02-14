@@ -9,11 +9,14 @@ import (
 )
 
 type waylandIdleController struct {
-	close    chan struct{}
-	display  *client.Display
-	notifier *idleNotify.IdleNotifier
-	registry *client.Registry
-	seat     *client.Seat
+	close chan struct{}
+	// The dispatch channel exists to synchronize the wayland communication which is not safe to be
+	// done over multiple goroutines.
+	dispatchChan chan func() error
+	display      *client.Display
+	notifier     *idleNotify.IdleNotifier
+	registry     *client.Registry
+	seat         *client.Seat
 }
 
 type waylandIdleNotification struct {
@@ -26,12 +29,27 @@ func (n *waylandIdleNotification) Close() error {
 	if n.closed {
 		return nil
 	}
-	err := n.notification.Destroy()
-	if err == nil {
-		n.closed = true
-		n.controller = nil
-	}
-	return err
+	n.closed = true
+
+	go func() {
+		closeFunc := func() error {
+			// Destroy must be done in the same goroutine as dispatch and other
+			// Wayland interactions.
+			err := n.notification.Destroy()
+			if err != nil {
+				return fmt.Errorf("failed to close wayland idle notification: %w", err)
+			}
+
+			return nil
+		}
+
+		select {
+		case <-n.controller.close:
+		case n.controller.dispatchChan <- closeFunc:
+		}
+	}()
+
+	return nil
 }
 
 // NewWaylandIdleController sets up a new Wayland connection.
@@ -42,7 +60,8 @@ func (n *waylandIdleNotification) Close() error {
 //   - Error that occurred when creating the controller.
 func NewWaylandIdleController() (Controller, <-chan func() error, error) {
 	m := &waylandIdleController{
-		close: make(chan struct{}, 1),
+		close:        make(chan struct{}, 1),
+		dispatchChan: make(chan func() error),
 	}
 	var err error
 	m.display, err = client.Connect("")
@@ -95,19 +114,17 @@ func NewWaylandIdleController() (Controller, <-chan func() error, error) {
 		return nil, nil, fmt.Errorf("error in registry GlobalHandler after roundtrip two: %w", globalHandlerError)
 	}
 
-	dispatchChan := make(chan func() error)
-
 	go func() {
 		for {
 			select {
-			case dispatchChan <- m.display.Context().GetDispatch():
+			case m.dispatchChan <- m.display.Context().GetDispatch():
 			case <-m.close:
 				return
 			}
 		}
 	}()
 
-	return m, dispatchChan, nil
+	return m, m.dispatchChan, nil
 }
 
 func (m *waylandIdleController) context() *client.Context {
