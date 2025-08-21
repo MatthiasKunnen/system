@@ -114,6 +114,14 @@ func NewWaylandIdleController() (Controller, <-chan func() error, error) {
 		return nil, nil, fmt.Errorf("error in registry GlobalHandler after roundtrip two: %w", globalHandlerError)
 	}
 
+	if m.notifier == nil {
+		err := m.Close()
+		if err != nil {
+			log.Printf("error closing WaylandIdleController: %v", err)
+		}
+		return nil, nil, errors.New("no notifier was set, ext-idle-notify might not be supported")
+	}
+
 	go func() {
 		for {
 			select {
