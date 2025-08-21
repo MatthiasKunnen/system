@@ -8,6 +8,8 @@ import (
 	"math"
 )
 
+var ErrIdleNotifyNotSupported = errors.New("no notifier initialized, ext-idle-notify might not be supported")
+
 type waylandIdleController struct {
 	close chan struct{}
 	// The dispatch channel exists to synchronize the wayland communication which is not safe to be
@@ -112,6 +114,10 @@ func NewWaylandIdleController() (Controller, <-chan func() error, error) {
 	}
 	if globalHandlerError != nil {
 		return nil, nil, fmt.Errorf("error in registry GlobalHandler after roundtrip two: %w", globalHandlerError)
+	}
+
+	if m.notifier == nil {
+		return nil, nil, errors.Join(ErrIdleNotifyNotSupported, m.Close())
 	}
 
 	go func() {
